@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calculadora de exportación</title>
+  <style>
+    :root { color-scheme: light; font: 16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; color: #191919; background: #f4f5f7; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; }
+    main { max-width: 1080px; margin: 0 auto; }
+    h1 { margin: 0 0 6px; font-size: clamp(1.6rem, 4vw, 2.2rem); }
+    .intro, .muted { color: #616773; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, .8fr); gap: 20px; align-items: start; margin-top: 20px; }
+    .card { background: white; border: 1px solid #e0e3e8; border-radius: 14px; padding: 20px; box-shadow: 0 4px 18px #1b23300a; }
+    .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    label, legend { display: block; font-weight: 650; font-size: .92rem; margin-bottom: 6px; }
+    input, select { width: 100%; min-height: 44px; padding: 9px 11px; border: 1px solid #b9bec8; border-radius: 8px; background: white; color: inherit; font: inherit; }
+    input:focus, select:focus { outline: 3px solid #1c6bff33; border-color: #1c6bff; }
+    fieldset { min-width: 0; border: 0; padding: 0; margin: 0; }
+    .wide { grid-column: 1 / -1; }
+    .check { display: flex; gap: 9px; align-items: center; min-height: 44px; }
+    .check input { width: 18px; min-height: 18px; margin: 0; }
+    .radio-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .radio-row label { display: flex; gap: 8px; align-items: center; border: 1px solid #e0e3e8; padding: 9px 12px; border-radius: 8px; margin: 0; font-weight: 500; }
+    .radio-row input { width: 16px; min-height: 16px; }
+    .results h2 { margin: 0 0 12px; font-size: 1.2rem; }
+    .empty { color: #616773; padding: 14px 0; }
+    .total { background: #172321; color: white; padding: 16px; border-radius: 11px; margin: 12px 0 16px; }
+    .total small { display: block; opacity: .8; }
+    .total strong { font-size: 1.65rem; }
+    .row { display: flex; justify-content: space-between; gap: 14px; padding: 8px 0; border-bottom: 1px solid #eef0f3; }
+    .row span:last-child { font-weight: 650; text-align: right; font-variant-numeric: tabular-nums; }
+    .section-label { margin: 18px 0 4px; font-weight: 700; }
+    .notice { padding: 11px 12px; background: #fff6df; border: 1px solid #f1d88d; border-radius: 9px; margin: 10px 0; }
+    .partial { color: #9b5300; font-weight: 700; }
+    .footnote { margin: 18px 0 0; font-size: .82rem; color: #626875; }
+    .hidden { display: none !important; }
+    @media (max-width: 760px) { body { padding: 16px; } .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 520px) { .fields { grid-template-columns: 1fr; } .wide { grid-column: auto; } .card { padding: 16px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Calculadora de exportación</h1>
+    <div class="intro">Estimación referencial de flete, seguro, impuestos y gastos de destino.</div>
+    <div class="layout">
+      <section class="card" aria-labelledby="inputs-title">
+        <h2 id="inputs-title">Datos del vehículo y destino</h2>
+        <div class="fields">
+          <div class="wide"><label for="country">País de destino</label><select id="country"></select></div>
+          <div><label id="value-label" for="value">Valor del vehículo (USD)</label><input id="value" type="number" min="0" step="100" placeholder="Ej. 12000"></div>
+          <div id="vehicle-wrap"><label for="vehicle">Tipo de vehículo</label><select id="vehicle">
+            <option value="SEDAN">Sedán</option><option value="SUV">SUV</option><option value="PICKUP">Pickup</option><option value="MOTO">Motocicleta</option><option value="CAMION">Camión</option>
+          </select></div>
+          <div id="technology-wrap" class="hidden"><label for="technology">Tecnología</label><select id="technology">
+            <option value="GASOLINA">Gasolina</option><option value="DIESEL">Diésel</option><option value="HIBRIDO">Híbrido</option><option value="ELECTRICO">Eléctrico</option>
+          </select></div>
+          <div id="engine-wrap" class="hidden"><label for="engine">Cilindraje</label><select id="engine"><option value="false">Hasta 2.000 cc</option><option value="true">Más de 2.000 cc</option></select></div>
+          <div id="co2-wrap" class="hidden"><label for="co2">Emisiones CO₂ (g/km)</label><select id="co2">
+            <option value="HASTA_120">Hasta 120</option><option value="DE_121_A_159">121–159</option><option value="DE_160_A_199">160–199</option><option value="DESDE_200">200 o más</option>
+          </select></div>
+          <fieldset class="wide"><legend>Flete</legend><div class="radio-row">
+            <label><input type="radio" name="freight-mode" value="REFERENCIAL" checked> Rango referencial</label>
+            <label><input type="radio" name="freight-mode" value="EXACTO"> Ingresar cotización</label>
+          </div></fieldset>
+          <div id="freight-wrap" class="hidden wide"><label id="freight-label" for="freight">Flete exacto (USD)</label><input id="freight" type="number" min="0" step="50" placeholder="Monto cotizado"></div>
+          <div class="wide"><label id="insurance-label" for="insurance">Seguro (USD, opcional)</label><input id="insurance" type="number" min="0" step="10" placeholder="Automático según destino"></div>
+        </div>
+        <p class="footnote">El seguro se estima automáticamente si dejas el campo vacío. Puedes reemplazarlo por una cotización.</p>
+      </section>
+      <section id="results" class="card results" aria-live="polite" aria-atomic="true"></section>
+    </div>
+    <p class="footnote">Estimación referencial. No sustituye una cotización de agente aduanal ni la valoración oficial de la aduana de destino.</p>
+  </main>
+  <script src="country-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
